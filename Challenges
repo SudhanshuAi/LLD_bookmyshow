@@ -1,53 +1,50 @@
-1. Concurrent Seat Booking
+1. Simultaneous Seat Booking
 
 Challenge -
-Multiple users trying to book the same seats simultaneously can lead to race conditions and double bookings.
+Multiple clients attempting to reserve the same seats at the same time can create race conditions and double bookings.
 
 Solution -
-    1.Implement Optimistic Locking with version control in the seats table
-    2.Use Redis for distributed locking with SETNX operation
-    3.Implement a seat locking mechanism with expiry (10 minutes)
-
+    1.Achieve Optimistic Locking with version numbers in the seats table
+    2.Make use of Redis for distributed lock with SETNX operation
+    3.Include a seat lock mechanism with an expiry (10 minutes)
 
 2. Payment Race Conditions
 
 Challenge-
-Payment confirmations might arrive after seat lock expiry or multiple payment attempts might succeed.
+Payment confirmations may take place after seat lock expiration or repeated payment attempts may be successful.
 
 Solution-
-    1.Implement idempotency keys for payment processing
-    2.Use a state machine for booking status transitions
-    3.Maintain payment attempt logs
-
+    1.Apply idempotency keys to payments
+    2.Apply a state machine to transitions in booking status
+    3.Log payment attempts
 
 3. High Concurrency During Popular Event Sales
 
 Challenge
-System might face extremely high load when tickets for popular events go on sale.
+System may experience very high load when tickets for popular events are put on sale.
 
 Solution
-    1.Implement a waiting room using Redis sorted sets
-    2.Use queue-based processing for bookings
-    3.Cache show availability counts
-
+1.Enforce a waiting room through Redis sorted sets
+2.Enforce queue-based processing for bookings
+3.Cache counts of show availability
 
 4. Database Load Management
 
 Challenge
-Heavy read operations on show and seat availability can overload the database.
+Excessive read operations on seat and show availability can burden the database.
 
 Solution
-    1.Implement materialized views for show availability
-    2.Use Redis cache for seat status
-    3.Implement read replicas with appropriate routing
+    1.Enforce materialized views for show availability
+    2.Enforce Redis cache for seat status
+    3.Enforce read replicas with proper routing
 
 
 5. Notification Reliability
 
 Challenge
-Ensuring reliable delivery of booking confirmations across multiple channels.
+Proven delivery of booking confirmations through various channels.
 
 Solution
-    1.Implement event-driven architecture using message queues
-    2.Use retry mechanisms with exponential backoff
-    3.Maintain notification logs for tracking
+    1.Absorb event-driven architecture with message queues
+    2.Apply retry mechanisms with exponential backoff
+    3.Store notification logs for tracking
