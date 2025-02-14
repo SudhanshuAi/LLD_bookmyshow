@@ -1,0 +1,155 @@
+Database Schema
+
+Users
+CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    email VARCHAR(255) UNIQUE,
+    phone VARCHAR(20) UNIQUE,
+    name VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+Events
+CREATE TABLE events (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255),
+    type ENUM('MOVIE', 'SHOW', 'COMEDY'),
+    description TEXT,
+    duration_mins INTEGER,
+    language VARCHAR(50),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+Venues
+CREATE TABLE venues (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255),
+    address TEXT,
+    city_id UUID,
+    total_seats INTEGER,
+    seat_layout JSONB,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (city_id) REFERENCES cities(id)
+);
+
+Shows
+CREATE TABLE shows (
+    id UUID PRIMARY KEY,
+    event_id UUID,
+    venue_id UUID,
+    show_time TIMESTAMP,
+    price_config JSONB,
+    status ENUM('ACTIVE', 'CANCELLED', 'COMPLETED'),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id),
+    FOREIGN KEY (venue_id) REFERENCES venues(id)
+);
+
+Seats
+CREATE TABLE seats (
+    id UUID PRIMARY KEY,
+    show_id UUID,
+    seat_number VARCHAR(10),
+    category VARCHAR(50),
+    price DECIMAL(10,2),
+    status ENUM('AVAILABLE', 'LOCKED', 'BOOKED'),
+    lock_expires_at TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (show_id) REFERENCES shows(id)
+);
+
+Bookings
+CREATE TABLE bookings (
+    id UUID PRIMARY KEY,
+    user_id UUID,
+    show_id UUID,
+    total_amount DECIMAL(10,2),
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED'),
+    payment_id UUID,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (show_id) REFERENCES shows(id)
+);
+
+BookingSeats
+CREATE TABLE booking_seats (
+    id UUID PRIMARY KEY,
+    booking_id UUID,
+    seat_id UUID,
+    price DECIMAL(10,2),
+    created_at TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    FOREIGN KEY (seat_id) REFERENCES seats(id)
+);
+
+Payments
+CREATE TABLE payments (
+    id UUID PRIMARY KEY,
+    booking_id UUID,
+    amount DECIMAL(10,2),
+    payment_method VARCHAR(50),
+    status ENUM('PENDING', 'SUCCESS', 'FAILED'),
+    transaction_id VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id)
+);
+
+
+API Definitions
+
+Event APIs
+GET /api/v1/events
+    - Query params: city_id, date, type, page, limit
+    - Returns list of events with basic details
+
+GET /api/v1/events/{id}
+    - Returns detailed event information
+
+GET /api/v1/events/{id}/shows
+    - Query params: date
+    - Returns all shows for an event on given date
+
+Venue APIs
+GET /api/v1/venues/{id}
+    - Returns venue details including seat layout
+
+GET /api/v1/venues/{id}/shows
+    - Query params: date
+    - Returns all shows at venue on given date
+
+Booking APIs
+POST /api/v1/bookings/lock
+    - Request body: show_id, seat_ids[]
+    - Locks selected seats for 10 minutes
+    - Returns booking_id
+
+POST /api/v1/bookings/{id}/confirm
+    - Request body: payment_method, user_details
+    - Initiates payment and confirms booking
+    - Returns payment gateway URL/token
+
+GET /api/v1/bookings/{id}
+    - Returns booking details including seats
+
+DELETE /api/v1/bookings/{id}
+    - Cancels booking and releases seats
+
+Payment APIs
+POST /api/v1/payments
+    - Request body: booking_id, payment_details
+    - Processes payment
+    - Returns payment status
+
+GET /api/v1/payments/{id}
+    - Returns payment details
+
+POST /api/v1/payments/webhook
+    - Payment gateway webhook endpoint
+    - Updates payment status and triggers notifications

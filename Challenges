@@ -1,0 +1,53 @@
+1. Concurrent Seat Booking
+
+Challenge -
+Multiple users trying to book the same seats simultaneously can lead to race conditions and double bookings.
+
+Solution -
+    1.Implement Optimistic Locking with version control in the seats table
+    2.Use Redis for distributed locking with SETNX operation
+    3.Implement a seat locking mechanism with expiry (10 minutes)
+
+
+2. Payment Race Conditions
+
+Challenge-
+Payment confirmations might arrive after seat lock expiry or multiple payment attempts might succeed.
+
+Solution-
+    1.Implement idempotency keys for payment processing
+    2.Use a state machine for booking status transitions
+    3.Maintain payment attempt logs
+
+
+3. High Concurrency During Popular Event Sales
+
+Challenge
+System might face extremely high load when tickets for popular events go on sale.
+
+Solution
+    1.Implement a waiting room using Redis sorted sets
+    2.Use queue-based processing for bookings
+    3.Cache show availability counts
+
+
+4. Database Load Management
+
+Challenge
+Heavy read operations on show and seat availability can overload the database.
+
+Solution
+    1.Implement materialized views for show availability
+    2.Use Redis cache for seat status
+    3.Implement read replicas with appropriate routing
+
+
+5. Notification Reliability
+
+Challenge
+Ensuring reliable delivery of booking confirmations across multiple channels.
+
+Solution
+    1.Implement event-driven architecture using message queues
+    2.Use retry mechanisms with exponential backoff
+    3.Maintain notification logs for tracking
